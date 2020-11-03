@@ -93,6 +93,12 @@ public class EmployeePayrollService {
 		}
 		return false;
 	}
+	
+	public void addEmployeeToPayroll(String name, double salary, LocalDate startDate, String gender,String department) {
+		EmployeePayrollData employeePayrollData = employeePayrollDBService.addEmployee(name, salary, startDate, gender,department);
+		empList.add(employeePayrollData);
+		System.out.println(empList);
+	}
 
 	public void updateEmployeeSalaryUsingPrepareStatement(String name, double salary) {
 		int result = employeePayrollDBService.updateEmployeeDataUsingPreparedStatement(name, salary);

@@ -15,7 +15,7 @@ public class EmployeePayrollTest {
 		EmployeePayrollService service = new EmployeePayrollService();
 		List<EmployeePayrollData> empList = service.readEmployeePayrollData(IOService.DB_IO);
 		System.out.println(empList);
-		Assert.assertEquals(4, empList.size());
+		Assert.assertEquals(5, empList.size());
 	}
 
 	@Test
@@ -54,5 +54,14 @@ public class EmployeePayrollTest {
 		Map<String, Double> averageSalaryByGender = service.readAverageSalaryByGender(IOService.DB_IO);
 		Assert.assertTrue(
 				averageSalaryByGender.get("M").equals(200.0) && averageSalaryByGender.get("F").equals(2000000.0));
+	}
+	
+	@Test
+	public void givenNewEmployee_WhenAdded_ShouldSyncWityhDB() {
+		EmployeePayrollService service = new EmployeePayrollService();
+		service.readEmployeePayrollData(IOService.DB_IO);
+		service.addEmployeeToPayroll("Mark", 5000000.00, LocalDate.now(), "M", "Sales");
+		boolean result = service.checkEmployeePayrollInSyncWithDB("Mark", 5000000.00);
+		Assert.assertTrue(result);
 	}
 }
