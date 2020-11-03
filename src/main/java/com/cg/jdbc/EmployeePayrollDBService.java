@@ -117,7 +117,7 @@ public class EmployeePayrollDBService {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public List<EmployeePayrollData> getEmployeeDetailsForGivenDateRange(LocalDate startDate, LocalDate endDate) {
 		String sql = String.format("select * from employee_payroll where start between '%s' and '%s';", startDate,
 				endDate);
@@ -131,7 +131,7 @@ public class EmployeePayrollDBService {
 		}
 		return employeePayrollList;
 	}
-	
+
 	public Map<String, Double> getAverageSalaryByGender() {
 		String sql = "select gender,avg(basic_pay) as avg from employee_payroll group by gender;";
 		Map<String, Double> map = new HashMap<>();
@@ -146,16 +146,17 @@ public class EmployeePayrollDBService {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		for (Map.Entry<String, Double> e : map.entrySet()) 
-            System.out.println(e.getKey() + " " + e.getValue()); 
+		for (Map.Entry<String, Double> e : map.entrySet())
+			System.out.println(e.getKey() + " " + e.getValue());
 		return map;
 	}
-	
-	public EmployeePayrollData addEmployee(String name, double salary, LocalDate startDate, String gender,
+
+	public EmployeePayrollData addEmployee(int id, String name, double salary, LocalDate startDate, String gender,
 			String dept) {
 		String sql = String.format(
-				"insert into employee_payroll (name,basic_pay,start,gender,department,deductions,taxable_pay,tax,net_pay) values ('%s',%.2f,'%s','%s','%s',0.00,0.00,0.00,0.00);",
-				name, salary, startDate.toString(), gender, dept);
+				"insert into employee_payroll (id,name,basic_pay,start,gender,department,deductions,taxable_pay,tax,net_pay) values (%s,'%s',%.2f,'%s','%s','%s',0.00,0.00,0.00,0.00);",
+				id, name, salary, startDate.toString(), gender, dept);
+		String s = startDate.toString();
 		int empId = -1;
 		EmployeePayrollData employeePayrollData = null;
 		try (Connection connection = this.getConnection()) {
@@ -166,7 +167,23 @@ public class EmployeePayrollDBService {
 				if (resultSet.next())
 					empId = resultSet.getInt(1);
 			}
-			employeePayrollData = new EmployeePayrollData(empId, name, salary, startDate);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		try (Statement statement = this.getConnection().createStatement()) {
+			double b = salary;
+
+			double deductions = salary * 0.2;
+			double taxablePay = salary - deductions;
+			double tax = taxablePay * 0.1;
+			double netPay = salary - tax;
+			String sql1 = String.format(
+					"insert into payroll (id,start,basic_pay,deductions,taxable_pay,tax,net_pay) values (%s,'%s',%.2f,%.2f,%.2f,%.2f,%.2f);",
+					id,s,b,salary, deductions, taxablePay, tax, netPay);
+			int rowsAffected = statement.executeUpdate(sql1, statement.RETURN_GENERATED_KEYS);
+			if (rowsAffected == 1) {
+				employeePayrollData = new EmployeePayrollData(empId, name, salary, startDate);
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
