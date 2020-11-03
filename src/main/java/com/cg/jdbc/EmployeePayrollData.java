@@ -24,7 +24,7 @@ public class EmployeePayrollData {
 
 	@Override
 	public String toString() {
-		return "id=" + id + ", name=" + name + ", salary=" + basic_pay+"; ";
+		return "id=" + id + ", Start=" +start+ ", name=" + name + ", salary=" + basic_pay+"; ";
 	}
 	@Override
 	public boolean equals(Object o) {
